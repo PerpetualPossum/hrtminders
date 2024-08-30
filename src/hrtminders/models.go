@@ -20,6 +20,7 @@ type User struct {
 type Schedule struct {
 	gorm.Model
 	ID         uint
+	Name       string
 	DiscordID  string
 	Cron       string
 	LastRun    sql.NullTime

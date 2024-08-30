@@ -1,17 +1,18 @@
 package main
 
 import (
+	"errors"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 )
 
 type Response struct {
 	Cron string `json:"cron"`
 }
 
-func convertToCron(naturalCron string) (string, bool) {
+func convertToCron(naturalCron string) (string, error) {
 	// Convert natural language cron to cron expression
 	apiUrl := ENVIRONMENT.CronApiUrl
 
@@ -22,17 +23,19 @@ func convertToCron(naturalCron string) (string, bool) {
 	reqUrl := apiUrl + "/?" + params.Encode()
 	resp, err := http.Get(reqUrl)
 	if err != nil {
-		log.Fatalf("Error calling cron api: %v", err)
-		return "", false
+		return "", err
+	} else if resp.StatusCode != 200 {
+		return "", errors.New("failed to convert natural cron to cron expression")
 	}
 
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatalf("Error reading response body: %v", err)
-		return "", false
+		return "", err
 	}
 
-	return string(body), true
+	print("\n" + string(body) + "\n" + strconv.Itoa((resp.StatusCode)))
+
+	return string(body), nil
 }
