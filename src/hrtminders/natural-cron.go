@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"io"
 	"log"
 	"net/http"
@@ -35,11 +34,5 @@ func convertToCron(naturalCron string) (string, bool) {
 		return "", false
 	}
 
-	var result Response
-	if err := json.Unmarshal(body, &result); err != nil {
-		log.Fatalf("Error unmarshalling response body: %v", err)
-		return "", false
-	}
-
-	return result.Cron, true
+	return string(body), true
 }

@@ -4,34 +4,15 @@ import (
 	"log"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/caarlos0/env"
 	"github.com/robfig/cron/v3"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-type environmentVariables struct {
-	BotToken         string `env:"BOT_TOKEN,required"`
-	LogLevel         string `env:"LOG_LEVEL" envDefault:"info"`
-	DatabaseHost     string `env:"DATABASE_HOST" envDefault:"localhost"`
-	DatabasePort     string `env:"DATABASE_PORT" envDefault:"5432"`
-	DatabaseName     string `env:"DATABASE_NAME" envDefault:"legbot"`
-	DatabaseUser     string `env:"DATABASE_USER" envDefault:"postgres"`
-	DatabasePassword string `env:"DATABASE_PASSWORD" envDefault:"postgres"`
-	CronApiUrl       string `env:"CRON_API_URL" envDefault:"https://natural-cron-api.fly.dev"`
-}
-
-var ENVIRONMENT *environmentVariables
-
 func main() {
-	envVars := &environmentVariables{}
-	err := env.Parse(envVars)
-	if err != nil {
-		log.Fatalf("Error parsing environment variables: %v", err)
-	}
-	ENVIRONMENT = envVars
+	initEnv()
 
-	discordBot, err := discordgo.New("Bot " + envVars.BotToken)
+	discordBot, err := discordgo.New("Bot " + ENVIRONMENT.BotToken)
 	if err != nil {
 		log.Fatalf("Error creating Discord session: %v", err)
 	}
@@ -49,7 +30,7 @@ func main() {
 		//}
 	})
 
-	dsn := "host=" + envVars.DatabaseHost + " port=" + envVars.DatabasePort + " user=" + envVars.DatabaseUser + " dbname=" + envVars.DatabaseName + " password=" + envVars.DatabasePassword + " sslmode=disable"
+	dsn := "host=" + ENVIRONMENT.DatabaseHost + " port=" + ENVIRONMENT.DatabasePort + " user=" + ENVIRONMENT.DatabaseUser + " dbname=" + ENVIRONMENT.DatabaseName + " password=" + ENVIRONMENT.DatabasePassword + " sslmode=disable"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("Error connecting to database: %v", err)
